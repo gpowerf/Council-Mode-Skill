@@ -21,7 +21,7 @@ The query is formulated into a standalone prompt and dispatched **in parallel** 
 | Role | Persona & Focus | OpenRouter Model ID |
 | :--- | :--- | :--- |
 | **Analytical Thinker** | Logic, reasoning, breaking down complex problems. Strong at knowledge, math, and software engineering. | `deepseek/deepseek-v4-pro` |
-| **Creative Strategist** | Novel solutions, out-of-the-box thinking, efficiency. | `google/gemini-2.5-flash-preview-05-20` or `meta-llama/llama-4-*` |
+| **Creative Strategist** | Novel solutions, out-of-the-box thinking, efficiency. | `google/gemini-2.5-flash` or `meta-llama/llama-4-maverick` |
 | **Critical Reviewer** | Identifying flaws, edge cases, and potential biases with a critical eye. | `anthropic/claude-opus-4.8` |
 | **Long-Horizon Reasoner** | Maintaining context, following standards, and handling long-running tasks. | `z-ai/glm-5.2` |
 
@@ -85,12 +85,43 @@ The model will then run the three-phase process and return a synthesized council
 
 ---
 
+## Optional: OpenRouter routing config
+
+A ready-to-use `opencode.json` snippet lives in [`examples/opencode.openrouter.json`](./examples/opencode.openrouter.json). It registers the four council model IDs with OpenRouter and sets sensible per-model routing. Copy it into your project (or merge into an existing `opencode.json`):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "openrouter": {
+      "models": {
+        "anthropic/claude-opus-4.8": {
+          "options": {
+            "provider": { "order": ["anthropic"], "allow_fallbacks": false }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+What this does (and does **not** do):
+
+- `options.provider` is passed through to OpenRouter's request body, so `order` and `allow_fallbacks` control **which inference provider serves a given model ID** — e.g. pin Claude Opus to Anthropic's own endpoint, or prefer Llama 4 Maverick from Together/Fireworks.
+- It is **not** a safety net for non-existent model IDs. `allow_fallbacks: true` only falls back across *providers of the same model*, never to a different model. That's why every ID in the table above is a verified live OpenRouter slug.
+- The `~` prefix (e.g. `~anthropic/claude-opus-latest`) is an OpenRouter-side convention for hidden/virtual aliases, not an opencode config key. Don't use it as a key in `provider.*.models`; pass the concrete slug instead.
+
+Run `/connect` once to add your OpenRouter API key, then `/models` to confirm the council models are reachable.
+
+---
+
 ## Requirements
 
 - An [opencode](https://opencode.ai) installation.
 - An [OpenRouter](https://openrouter.ai) account/API key configured as a provider so the four council models are reachable. See opencode's provider configuration in the [config schema](https://opencode.ai/config.json).
 
-> **Note on model IDs:** The model IDs in the table are the ones referenced by the skill. A few are forward-looking / aspirational identifiers from the paper. Swap them for live OpenRouter model IDs in `SKILL.md` if any are unavailable on your account.
+> **Note on model IDs:** All four model IDs are verified **live** on OpenRouter (checked against `GET https://openrouter.ai/api/v1/models`). Swap any of them in `SKILL.md` to suit your account — keep the panel heterogeneous. Context windows and pricing as of this writing: `deepseek/deepseek-v4-pro` (1M ctx, ~$0.44/$0.88 per Mtok), `google/gemini-2.5-flash` (1M ctx, ~$0.30/$2.50), `meta-llama/llama-4-maverick` (1M ctx, ~$0.20/$0.80), `anthropic/claude-opus-4.8` (1M ctx, ~$5/$25), `z-ai/glm-5.2` (1M ctx, ~$0.95/$2.99).
 
 ---
 
@@ -108,6 +139,7 @@ The model will then run the three-phase process and return a synthesized council
 
 ```
 .opencode/skills/council-mode/SKILL.md   # the skill itself
+examples/opencode.openrouter.json        # OpenRouter routing config (drop-in)
 README.md
 LICENSE
 ```

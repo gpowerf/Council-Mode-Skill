@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "openrouter": {
+      "models": {
+        "deepseek/deepseek-v4-pro": {
+          "name": "DeepSeek V4 Pro (Council: Analytical Thinker)"
+        },
+        "google/gemini-2.5-flash": {
+          "name": "Gemini 2.5 Flash (Council: Creative Strategist)",
+          "options": {
+            "provider": {
+              "order": ["google"],
+              "allow_fallbacks": true,
+              "only": ["google", "anthropic"]
+            }
+          }
+        },
+        "meta-llama/llama-4-maverick": {
+          "name": "Llama 4 Maverick (Council: Creative Strategist alt)",
+          "options": {
+            "provider": {
+              "order": ["together", "fireworks"],
+              "allow_fallbacks": true
+            }
+          }
+        },
+        "anthropic/claude-opus-4.8": {
+          "name": "Claude Opus 4.8 (Council: Critical Reviewer)",
+          "options": {
+            "provider": {
+              "order": ["anthropic"],
+              "allow_fallbacks": false
+            }
+          }
+        },
+        "z-ai/glm-5.2": {
+          "name": "GLM 5.2 (Council: Long-Horizon Reasoner)"
+        }
+      }
+    }
+  }
+}
